@@ -6828,15 +6828,8 @@ addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
 		CopyPlcName.MouseButton1Click:Connect(function()
 			toClipboard(Asset.Name)
 		end)
-
-		repeat
-	players = Players:GetPlayers()
-	SINFOGUI.players.Text = #players .. " Player(s)"
-	SINFOGUI.appearance.Text = "Appearance: " .. speaker.CharacterAppearanceId
-
-	local rawTime = workspace.DistributedGameTime
-
-	-- انتظر أول دقيقة كاملة قبل بدء أي عرض
+repeat
+	0 بدء أي عرض
 	if rawTime < 60 then
 		SINFOGUI.Time.Text = "Loading..."
 	else
@@ -6870,6 +6863,7 @@ until SINFOGUI.Parent == nil
 end)
 end)
 
+		
 addcmd("jobid", {}, function(args, speaker)
     toClipboard("roblox://placeId=" .. PlaceId .. "&gameInstanceId=" .. JobId)
 end)
