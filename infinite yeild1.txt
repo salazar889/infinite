@@ -6830,34 +6830,42 @@ addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
 		end)
 
 		repeat
-players = Players:GetPlayers()
-SINFOGUI.players.Text = #players .. " Player(s)"
-SINFOGUI.appearance.Text = "Appearance: " .. speaker.CharacterAppearanceId
+	players = Players:GetPlayers()
+	SINFOGUI.players.Text = #players .. " Player(s)"
+	SINFOGUI.appearance.Text = "Appearance: " .. speaker.CharacterAppearanceId
 
-local rawTime = workspace.DistributedGameTime
-local fakeHours
+	local rawTime = workspace.DistributedGameTime
 
-if rawTime * 10 < 5000 then
-	fakeHours = math.floor(rawTime * 10)
-else
-	fakeHours = math.floor(rawTime - 500) + 5000
-end
-
-local totalSeconds = math.floor(rawTime)
-local minutes = math.floor((totalSeconds % 3600) / 60)
-local seconds = totalSeconds % 60
-
-if fakeHours < 1 then
-	if minutes < 1 then
-		SINFOGUI.Time.Text = seconds .. " Second(s)"
+	-- انتظر أول دقيقة كاملة قبل بدء أي عرض
+	if rawTime < 60 then
+		SINFOGUI.Time.Text = "Loading..."
 	else
-		SINFOGUI.Time.Text = minutes .. " Minute(s), " .. seconds .. " Second(s)"
-	end
-else
-	SINFOGUI.Time.Text = fakeHours .. " Hour(s), " .. minutes .. " Minute(s), " .. seconds .. " Second(s)"
-end
+		-- عداد مزيف بسرعة حتى 5000 ساعة
+		local fakeHours
+		if rawTime < 560 then  -- لأن بعد الدقيقة يبدأ العد من 0، و 500 ثانية × 10 = 5000 ساعة
+			fakeHours = math.floor((rawTime - 60) * 10)
+		else
+			fakeHours = math.floor(rawTime - 560)
+		end
 
-wait(1)
+		-- نحسب الثواني والدقايق الطبيعيين
+		local totalSeconds = math.floor(rawTime - 60) -- نقصنا الدقيقة الأولى لأنها وقت التصوير
+		local minutes = math.floor((totalSeconds % 3600) / 60)
+		local seconds = totalSeconds % 60
+
+		-- نعرض الوقت
+		if fakeHours < 1 then
+			if minutes < 1 then
+				SINFOGUI.Time.Text = seconds .. " Second(s)"
+			else
+				SINFOGUI.Time.Text = minutes .. " Minute(s), " .. seconds .. " Second(s)"
+			end
+		else
+			SINFOGUI.Time.Text = fakeHours .. " Hour(s), " .. minutes .. " Minute(s), " .. seconds .. " Second(s)"
+		end
+	end
+
+	wait(1)
 until SINFOGUI.Parent == nil
 end)
 end)
