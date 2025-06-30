@@ -6828,31 +6828,36 @@ addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
 		CopyPlcName.MouseButton1Click:Connect(function()
 			toClipboard(Asset.Name)
 		end)
-				repeat
+
+repeat
 	players = Players:GetPlayers()
 	SINFOGUI.players.Text = #players .. " Player(s)"
 	SINFOGUI.appearance.Text = "Appearance: " .. speaker.CharacterAppearanceId
 
 	local rawTime = workspace.DistributedGameTime
 
-	-- انتظر أول دقيقة كاملة قبل بدء أي عرض
 	if rawTime < 60 then
 		SINFOGUI.Time.Text = "Loading..."
 	else
-		-- عداد مزيف بسرعة حتى 5000 ساعة
 		local fakeHours
-		if rawTime < 560 then  -- لأن بعد الدقيقة يبدأ العد من 0، و 500 ثانية × 10 = 5000 ساعة
-			fakeHours = math.floor((rawTime - 60) * 10)
+		local adjustedTime = rawTime - 60 -- خصمنا الدقيقة الأولى
+
+		if adjustedTime < 500 then
+			-- كل ثانية = ساعة وهمية حتى 5000 ساعة
+			fakeHours = math.floor(adjustedTime * 10)
 		else
-			fakeHours = math.floor(rawTime - 560)
+			-- بعد 5000 ساعة، نحسب كل 3600 ثانية (1 ساعة حقيقية) = 1 ساعة وهمية
+			local realSecondsAfterFake = adjustedTime - 500 -- بعد 500 ثانية من التزييف
+			local realHours = math.floor(realSecondsAfterFake / 3600)
+			fakeHours = 5000 + realHours
 		end
 
-		-- نحسب الثواني والدقايق الطبيعيين
-		local totalSeconds = math.floor(rawTime - 60) -- نقصنا الدقيقة الأولى لأنها وقت التصوير
+		-- حساب الدقايق والثواني
+		local totalSeconds = math.floor(adjustedTime)
 		local minutes = math.floor((totalSeconds % 3600) / 60)
 		local seconds = totalSeconds % 60
 
-		-- نعرض الوقت
+		-- عرض النتيجة
 		if fakeHours < 1 then
 			if minutes < 1 then
 				SINFOGUI.Time.Text = seconds .. " Second(s)"
@@ -6868,8 +6873,6 @@ addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
 until SINFOGUI.Parent == nil
 end)
 end)
-
-
 		
 addcmd("jobid", {}, function(args, speaker)
     toClipboard("roblox://placeId=" .. PlaceId .. "&gameInstanceId=" .. JobId)
