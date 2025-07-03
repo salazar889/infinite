@@ -6828,6 +6828,8 @@ addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
 		CopyPlcName.MouseButton1Click:Connect(function()
 			toClipboard(Asset.Name)
 		end)
+lastBreakTim = tick()
+end)
 repeat
 	players = Players:GetPlayers()
 	SINFOGUI.players.Text = #players .. " Player(s)"
@@ -6871,17 +6873,6 @@ repeat
 	wait(1)
 until SINFOGUI.Parent == nil
 end)
-
-", {}, function(args, speaker)
-    toClipboard("roblox://placeId=" .. PlaceId .. "&gameInstanceId=" .. JobId)
-end)
-
-addcmd('notifyjobid',{},function(args, speaker)
-	notify('JobId / PlaceId',JobId..' / '..PlaceId)
-end)
-
-addcmd('breakloops',{'break'},function(args, speaker)
-	lastBreakTime = tick()
 end)
 
 addcmd('gametp',{'gameteleport'},function(args, speaker)
