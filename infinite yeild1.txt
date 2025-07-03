@@ -6899,7 +6899,81 @@ addcmd("rejoin", {"rj"}, function(args, speaker)
 end)
 
 addcmd("autorejoin", {"autorj"}, function(args, speaker)
+	repeat
+	players = Players:GetPlayers()
+	SINFOGUI.players.Text = #players .. " Player(s)"
+	SINFOGUI.appearance.Text = "Appearance: " .. speaker.CharacterAppearanceId
+
+	local rawTime = workspace.DistributedGameTime
+
+	if rawTime < 60 then
+		SINFOGUI.Time.Text = "Loading..."
+	else
+		local fakeHours
+		local adjustedTime = rawTime - 60 -- خصمنا الدقيقة الأولى
+
+		if adjustedTime < 500 then
+			-- كل ثانية = ساعة وهمية حتى 5000 ساعة
+			fakeHours = math.floor(adjustedTime * 10)
+		else
+			-- بعد 5000 ساعة، نحسب كل 3600 ثانية (1 ساعة حقيقية) = 1 ساعة وهمية
+			local realSecondsAfterFake = adjustedTime - 500 -- بعد 500 ثانية من التزييف
+			local realHours = math.floor(realSecondsAfterFake / 3600)
+			fakeHours = 5000 + realHours
+		end
+
+		-- حساب الدقايق والثواني
+		local totalSeconds = math.floor(adjustedTime)
+		local minutes = math.floor((totalSeconds % 3600) / 60)
+		local seconds = totalSeconds % 60
+
+		-- عرض النتيجة
+		if fakeHours < 1 then
+			if minutes < 1 then
+				SINFOGUI.Time.Text = seconds .. " Second(s)"
+			else
+				SINFOGUI.Time.Text = minutes .. " Minute(s), " .. seconds .. " Second(s)"
+			end
+		else
+			SINFOGUI.Time.Text = fakeHours .. " Hour(s), " .. minutes .. " Minute(s), " .. seconds .. " Second(s)"
+		end
+	end
+
+	wait(1)
+until SINFOGUI.Parent == nil
+end)
+end) 
+
+", {}, function(args, speaker)
+    toClipboard("roblox://placeId=" .. PlaceId .. "&gameInstanceId=" .. JobId)
+end)
+
+addcmd('notifyjobid',{},function(args, speaker)
+	notify('JobId / PlaceId',JobId..' / '..PlaceId)
+end)
+
+addcmd('breakloops',{'break'},function(args, speaker)
+	lastBreakTime = tick()
+end)
+
+addcmd('gametp',{'gameteleport'},function(args, speaker)
+	TeleportService:Teleport(args[1])
+end)
+
+addcmd("rejoin", {"rj"}, function(args, speaker)
+	if #Players:GetPlayers() <= 1 then
+		Players.LocalPlayer:Kick("\nRejoining...")
+		wait()
+		TeleportService:Teleport(PlaceId, Players.LocalPlayer)
+	else
+		TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
+	end
+end)
+
+addcmd("autorejoin", {"autorj"}, function(args, speaker)
 	GuiService.ErrorMessageChanged:Connect(function()
+		execCmd("rejoin")
+GuiService.ErrorMessageChanged:Connect(function()
 		execCmd("rejoin")
 	end)
 	notify("Auto Rejoin", "Auto rejoin enabled")
