@@ -6828,12 +6828,6 @@ addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
 		CopyPlcName.MouseButton1Click:Connect(function()
 			toClipboard(Asset.Name)
 		end)
--- متغيرات التحكم
-local fakeTotalSeconds = 0
-local fastMode = true
-local initialStartDone = false
-local lastGuiPosition = nil
-
 repeat
 	players = Players:GetPlayers()
 	SINFOGUI.players.Text = #players .. " Player(s)"
@@ -6844,57 +6838,41 @@ repeat
 	if rawTime < 60 then
 		SINFOGUI.Time.Text = "Loading..."
 	else
-		local adjustedTime = rawTime - 60
+		local fakeHours
+		local adjustedTime = rawTime - 60 -- خصمنا الدقيقة الأولى
 
-		if not initialStartDone then
-			if adjustedTime < 5000 then
-				fakeTotalSeconds = math.floor(adjustedTime * 10)
-			else
-				fakeTotalSeconds = 5000 * 3600 + math.floor(adjustedTime - 560)
-			end
-			initialStartDone = true
-		end
-
-		-- التبديل بين الوضع السريع والبطيء عند تحريك GUI
-		if SINFOGUI.Position ~= lastGuiPosition then
-			lastGuiPosition = SINFOGUI.Position
-			fastMode = not fastMode
-		end
-
-		-- التحديث حسب الوضع الحالي
-		if fastMode and fakeTotalSeconds < 5000 * 3600 then
-			fakeTotalSeconds += 10
+		if adjustedTime < 500 then
+			-- كل ثانية = ساعة وهمية حتى 5000 ساعة
+			fakeHours = math.floor(adjustedTime * 10)
 		else
-			fakeTotalSeconds += 1
+			-- بعد 5000 ساعة، نحسب كل 3600 ثانية (1 ساعة حقيقية) = 1 ساعة وهمية
+			local realSecondsAfterFake = adjustedTime - 500 -- بعد 500 ثانية من التزييف
+			local realHours = math.floor(realSecondsAfterFake / 3600)
+			fakeHours = 5000 + realHours
 		end
 
-		-- حساب الوقت
-		local fakeHours = math.floor(fakeTotalSeconds / 3600)
-		local fakeMinutes = math.floor((fakeTotalSeconds % 3600) / 60)
-		local fakeSeconds = fakeTotalSeconds % 60
+		-- حساب الدقايق والثواني
+		local totalSeconds = math.floor(adjustedTime)
+		local minutes = math.floor((totalSeconds % 3600) / 60)
+		local seconds = totalSeconds % 60
 
-		-- التأكد من الثواني والمينت ما يتعدوا 59
-		if fakeSeconds > 59 then fakeSeconds = 59 end
-		if fakeMinutes > 59 then fakeMinutes = 59 end
-
-		-- عرض الوقت
+		-- عرض النتيجة
 		if fakeHours < 1 then
-			if fakeMinutes < 1 then
-				SINFOGUI.Time.Text = fakeSeconds .. " Second(s)"
+			if minutes < 1 then
+				SINFOGUI.Time.Text = seconds .. " Second(s)"
 			else
-				SINFOGUI.Time.Text = fakeMinutes .. " Minute(s), " .. fakeSeconds .. " Second(s)"
+				SINFOGUI.Time.Text = minutes .. " Minute(s), " .. seconds .. " Second(s)"
 			end
 		else
-			SINFOGUI.Time.Text = fakeHours .. " Hour(s), " .. fakeMinutes .. " Minute(s), " .. fakeSeconds .. " Second(s)"
+			SINFOGUI.Time.Text = fakeHours .. " Hour(s), " .. minutes .. " Minute(s), " .. seconds .. " Second(s)"
 		end
 	end
 
 	wait(1)
 until SINFOGUI.Parent == nil
 end)
-end)	
 
-addcmd("jobid", {}, function(args, speaker)
+", {}, function(args, speaker)
     toClipboard("roblox://placeId=" .. PlaceId .. "&gameInstanceId=" .. JobId)
 end)
 
